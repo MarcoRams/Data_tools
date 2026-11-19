@@ -169,6 +169,171 @@
     <p>Cliquez sur une technologie pour voir ses avantages, inconvénients, équivalences et guides de migration.</p>
   </header>
 
+  <section class="data-flow-diagram" style="max-width:1200px; margin:1.5rem auto; padding:0 1.5rem;">
+    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:1.25rem; box-shadow:0 1px 3px rgba(15,23,42,0.04);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+        <div>
+          <h2 style="margin:0; font-size:1.1rem; color:#0f172a;">Positionnement des catégories dans un projet Data</h2>
+          <p style="margin:0.2rem 0 0; font-size:0.84rem; color:#64748b;">Cliquez sur une catégorie pour la mettre en avant (ou filtrer la liste si <code>setCategory</code> est définie).</p>
+        </div>
+        <button type="button" onclick="resetDiagramSelection()" style="border:1px solid #cbd5e1; background:#f8fafc; color:#334155; padding:0.35rem 0.75rem; border-radius:8px; font-size:0.8rem; cursor:pointer;">
+          Réinitialiser la sélection
+        </button>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <svg id="dataFlowSvg" viewBox="0 0 1120 500" width="100%" style="min-width:780px; height:auto; display:block; font-family:system-ui,-apple-system,sans-serif;">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+            </marker>
+            <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb" />
+            </marker>
+          </defs>
+
+          <!-- Flèches de socle vers Orchestration -->
+          <line x1="250" y1="88" x2="505" y2="145" stroke="#475569" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arrow)" />
+          <line x1="870" y1="88" x2="615" y2="145" stroke="#475569" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arrow)" />
+
+          <!-- Flèches d'Orchestration vers Ingestion et Data Lake -->
+          <line x1="460" y1="185" x2="250" y2="235" stroke="#2563eb" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arrow-blue)" />
+          <line x1="660" y1="185" x2="870" y2="235" stroke="#2563eb" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arrow-blue)" />
+
+          <!-- Flèches Ingestion & Data Lake vers Data Warehouse Cloud -->
+          <line x1="250" y1="333" x2="505" y2="385" stroke="#475569" stroke-width="2.2" marker-end="url(#arrow)" />
+          <line x1="870" y1="333" x2="615" y2="385" stroke="#475569" stroke-width="2.2" marker-end="url(#arrow)" />
+
+          <!-- Flèche Data Warehouse Cloud vers BI & Visualisation -->
+          <line x1="710" y1="425" x2="775" y2="425" stroke="#475569" stroke-width="2.2" marker-end="url(#arrow)" />
+
+          <!-- Nœuds générés dynamiquement -->
+          <g id="diagramNodes"></g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      const nodes = [
+        {
+          id: "cloud-providers",
+          cat: "Cloud Providers",
+          x: 90, y: 12, w: 320, h: 76,
+          fill: "#f1f5f9", stroke: "#64748b",
+          title: "Cloud Providers",
+          tech: "AWS · GCP · Azure",
+          phrase: "Fournissent l'infrastructure cloud à la demande pour tout le projet."
+        },
+        {
+          id: "serveurs-physiques",
+          cat: "Serveurs physiques",
+          x: 710, y: 12, w: 320, h: 76,
+          fill: "#f1f5f9", stroke: "#64748b",
+          title: "Serveurs physiques",
+          tech: "On-Premise · Bare-Metal",
+          phrase: "Hébergent les systèmes en local avec contrôle matériel direct."
+        },
+        {
+          id: "orchestration",
+          cat: "Orchestration",
+          x: 390, y: 145, w: 340, h: 78,
+          fill: "#eff6ff", stroke: "#2563eb",
+          title: "Orchestration",
+          tech: "Airflow · Dagster · Prefect",
+          phrase: "Planifie, déclenche et surveille l'exécution des pipelines."
+        },
+        {
+          id: "ingestion-etl",
+          cat: "Ingestion / ETL",
+          x: 90, y: 245, w: 320, h: 88,
+          fill: "#ffffff", stroke: "#334155",
+          title: "Ingestion / ETL",
+          tech: "Airbyte · dlt · Fivetran",
+          phrase: "Extrait, transfère et charge les données depuis les sources."
+        },
+        {
+          id: "data-lake",
+          cat: "Data Lake / Table Formats",
+          x: 710, y: 245, w: 320, h: 88,
+          fill: "#ffffff", stroke: "#334155",
+          title: "Data Lake / Table Formats",
+          tech: "Apache Iceberg · S3 · Parquet",
+          phrase: "Stocke de larges volumes de données ouvertes et structurées."
+        },
+        {
+          id: "warehouse",
+          cat: "Data Warehouse Cloud",
+          x: 390, y: 385, w: 320, h: 88,
+          fill: "#ffffff", stroke: "#0f172a",
+          title: "Data Warehouse Cloud",
+          tech: "Snowflake · BigQuery · Redshift",
+          phrase: "Centralise, modélise et interroge rapidement les données analytiques."
+        },
+        {
+          id: "bi",
+          cat: "BI & Visualisation",
+          x: 780, y: 385, w: 320, h: 88,
+          fill: "#ffffff", stroke: "#0f172a",
+          title: "BI & Visualisation",
+          tech: "Power BI · Metabase · Tableau",
+          phrase: "Affiche les indicateurs et tableaux de bord pour les utilisateurs métier."
+        }
+      ];
+
+      let activeId = null;
+      const container = document.getElementById("diagramNodes");
+
+      function escapeXml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      }
+
+      function renderDiagram() {
+        container.innerHTML = nodes.map(n => {
+          const isSelected = n.id === activeId;
+          const strokeWidth = isSelected ? 3.5 : 1.75;
+          const strokeColor = isSelected ? "#1d4ed8" : n.stroke;
+          const bgColor = isSelected ? "#dbeafe" : n.fill;
+
+          return `
+            <g style="cursor:pointer;" onclick="handleDiagramNodeClick('${n.id}', '${n.cat.replace(/'/g, "\\'")}')">
+              <rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="10"
+                    fill="${bgColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+              <text x="${n.x + 14}" y="${n.y + 22}" font-size="13.5" font-weight="700" fill="#0f172a">
+                ${escapeXml(n.title)}
+              </text>
+              <text x="${n.x + n.w - 14}" y="${n.y + 21}" font-size="11" font-weight="600" fill="#2563eb" text-anchor="end">
+                ${escapeXml(n.tech)}
+              </text>
+              <text x="${n.x + 14}" y="${n.y + 46}" font-size="11.5" fill="#334155">
+                ${escapeXml(n.phrase)}
+              </text>
+            </g>
+          `;
+        }).join("");
+      }
+
+      window.handleDiagramNodeClick = function (id, cat) {
+        activeId = (activeId === id) ? null : id;
+        renderDiagram();
+        if (typeof window.setCategory === "function") {
+          window.setCategory(activeId ? cat : "Toutes");
+        }
+      };
+
+      window.resetDiagramSelection = function () {
+        activeId = null;
+        renderDiagram();
+        if (typeof window.setCategory === "function") {
+          window.setCategory("Toutes");
+        }
+      };
+
+      renderDiagram();
+    })();
+  </script>
+
   <div class="controls">
     <div class="categories" id="categoryFilters"></div>
     <input type="search" id="searchInput" placeholder="Rechercher un outil..." />
