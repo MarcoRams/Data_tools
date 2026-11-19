@@ -1,0 +1,171 @@
+[
+  {
+    "id": "snowflake",
+    "nom": "Snowflake",
+    "categorie": "Data Warehouse Cloud",
+    "resume": "Data Warehouse cloud managé avec séparation native du stockage et du calcul.",
+    "avantages": [
+      "Administration quasi nulle et scalabilité instantanée",
+      "Partage de données inter-comptes sécurisé (Data Sharing)",
+      "Support natif du semi-structuré (JSON, Parquet)"
+    ],
+    "inconvenients": [
+      "Coûts pouvant déraper sans gouvernance stricte des warehouses",
+      "Vendor lock-in sur le stockage propriétaire (hors tables Iceberg)",
+      "Pas de calcul GPU natif pour le Deep Learning lourd"
+    ],
+    "equivalences": [
+      {
+        "cible_id": "bigquery",
+        "cible_nom": "Google BigQuery",
+        "difficulte": "Moyenne",
+        "comment_migrer": "Exporter les tables en Parquet sur GCS via COPY INTO, convertir les requêtes SQL (notamment FLATTEN et fonctions de dates) vers GoogleSQL, et rebrancher les connecteurs BI/dbt."
+      },
+      {
+        "cible_id": "iceberg",
+        "cible_nom": "Apache Iceberg (Data Lakehouse)",
+        "difficulte": "Moyenne à élevée",
+        "comment_migrer": "Convertir les tables internes en tables Iceberg gérées sur S3/GCS, déployer un catalogue ouvert (Polaris, Nessie ou Glue) et basculer les moteurs de lecture (Trino, Spark, DuckDB)."
+      }
+    ]
+  },
+  {
+    "id": "bigquery",
+    "nom": "Google BigQuery",
+    "categorie": "Data Warehouse Cloud",
+    "resume": "Data Warehouse serverless orienté requêtage analytique massif à la demande.",
+    "avantages": [
+      "100 % serverless : aucun cluster ou taille de machine à gérer",
+      "Intégration native avec l'écosystème GCP et Looker",
+      "Modèle de tarification au volume scanné très avantageux sur les usages ponctuels"
+    ],
+    "inconvenients": [
+      "Facturation imprévisible sans quotas sur les requêtes mal optimisées",
+      "Fortement couplé à Google Cloud Platform",
+      "Latence minimale de quelques centaines de millisecondes (non adapté au transactionnel)"
+    ],
+    "equivalences": [
+      {
+        "cible_id": "snowflake",
+        "cible_nom": "Snowflake",
+        "difficulte": "Moyenne",
+        "comment_migrer": "Utiliser EXPORT DATA vers GCS en format Parquet, charger dans Snowflake via Stage externe, puis adapter le SQL (types STRUCT/ARRAY vers OBJECT/ARRAY Snowflake)."
+      }
+    ]
+  },
+  {
+    "id": "iceberg",
+    "nom": "Apache Iceberg",
+    "categorie": "Data Lake / Table Formats",
+    "resume": "Format de table ouvert apportant les transactions ACID et le time-travel sur un stockage objet.",
+    "avantages": [
+      "Zéro lock-in : lisible par Spark, Trino, DuckDB, Snowflake et BigQuery",
+      "Évolution de schéma et de partitionnement sans réécrire les données",
+      "Coût de stockage très faible (S3, GCS, Azure Blob ou MinIO)"
+    ],
+    "inconvenients": [
+      "Nécessite de gérer un catalogue de métadonnées et la maintenance (compaction)",
+      "Mise en place plus technique qu'un Data Warehouse clé en main"
+    ],
+    "equivalences": [
+      {
+        "cible_id": "snowflake",
+        "cible_nom": "Snowflake",
+        "difficulte": "Faible",
+        "comment_migrer": "Créer des External Volumes et des Iceberg Tables directement dans Snowflake pointant vers vos fichiers existants, sans copie physique des données."
+      }
+    ]
+  },
+  {
+    "id": "powerbi",
+    "nom": "Microsoft Power BI",
+    "categorie": "BI & Visualisation",
+    "resume": "Plateforme leader de Business Intelligence et de modélisation sémantique.",
+    "avantages": [
+      "Très forte adoption métier et intégration native Office 365 / Azure",
+      "Moteur en mémoire (VertiPaq) très rapide sur les modèles en étoile",
+      "Coût de licence d'entrée compétitif"
+    ],
+    "inconvenients": [
+      "Langage DAX complexe à maintenir sur les gros projets",
+      "Dépendance forte à l'écosystème Windows/Microsoft pour le développement (Power BI Desktop)"
+    ],
+    "equivalences": [
+      {
+        "cible_id": "metabase",
+        "cible_nom": "Metabase",
+        "difficulte": "Moyenne",
+        "comment_migrer": "Déporter la logique métier des mesures DAX vers des modèles SQL (ex. via dbt) dans votre entrepôt, puis reconstruire les questions et tableaux de bord dans Metabase."
+      }
+    ]
+  },
+  {
+    "id": "metabase",
+    "nom": "Metabase",
+    "categorie": "BI & Visualisation",
+    "resume": "Outil BI open-source simple et rapide pour l'exploration SQL et visuelle.",
+    "avantages": [
+      "Prise en main immédiate par les équipes non-techniques",
+      "Auto-hébergeable facilement via Docker ou disponible en Cloud",
+      "Version open-source gratuite et sans limite d'utilisateurs"
+    ],
+    "inconvenients": [
+      "Moins adapté aux modèles sémantiques complexes ou au pixel-perfect",
+      "Permissions fines et embedding avancé réservés aux versions payantes"
+    ],
+    "equivalences": [
+      {
+        "cible_id": "powerbi",
+        "cible_nom": "Microsoft Power BI",
+        "difficulte": "Moyenne",
+        "comment_migrer": "Connecter Power BI aux mêmes vues SQL sous-jacentes, recréer les relations en modèle en étoile et répliquer les règles de sécurité ligne (RLS)."
+      }
+    ]
+  },
+  {
+    "id": "aws",
+    "nom": "Amazon Web Services (AWS)",
+    "categorie": "Cloud Providers",
+    "resume": "Fournisseur cloud historique offrant le catalogue de services Data le plus vaste (S3, Glue, Redshift, EMR).",
+    "avantages": [
+      "Maturité maximale et disponibilité mondiale",
+      "S3 est devenu le standard de fait du stockage objet",
+      "Écosystème complet pour tous les cas d'usage Data & IA"
+    ],
+    "inconvenients": [
+      "Complexité de configuration (IAM, réseaux VPC) et fragmentation des services",
+      "Frais de sortie réseau (egress) élevés"
+    ],
+    "equivalences": [
+      {
+        "cible_id": "onprem",
+        "cible_nom": "Serveurs physiques / On-Premise",
+        "difficulte": "Élevée",
+        "comment_migrer": "Remplacer S3 par MinIO ou Ceph, migrer les bases managées vers PostgreSQL/ClickHouse auto-hébergés, conteneuriser les traitements sur Kubernetes et rapatrier les données via liaison dédiée."
+      }
+    ]
+  },
+  {
+    "id": "onprem",
+    "nom": "Serveurs physiques / On-Premise",
+    "categorie": "Serveurs physiques",
+    "resume": "Infrastructure matérielle dédiée hébergée dans vos propres datacenters ou en colocation.",
+    "avantages": [
+      "Maîtrise totale des coûts fixes à volume constant et prévisible",
+      "Souveraineté physique complète et latence locale minimale",
+      "Aucun frais d'egress réseau"
+    ],
+    "inconvenients": [
+      "Délais d'approvisionnement matériel et manque d'élasticité",
+      "Maintenance matérielle, réseau, sauvegardes et sécurité à votre charge"
+    ],
+    "equivalences": [
+      {
+        "cible_id": "aws",
+        "cible_nom": "Amazon Web Services (AWS)",
+        "difficulte": "Élevée",
+        "comment_migrer": "Auditer les flux réseau, migrer le stockage fichiers vers S3 (via AWS DataSync), passer les VMs en mode Lift-and-Shift (EC2) ou re-platformer sur des services managés."
+      }
+    ]
+  }
+]

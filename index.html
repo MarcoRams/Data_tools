@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cartographie des Technologies Data & Équivalences</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --green-bg: #f0fdf4;
+      --green-text: #166534;
+      --red-bg: #fef2f2;
+      --red-text: #991b1b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+    }
+    header h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
+    header p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    .controls {
+      max-width: 1200px;
+      margin: 1.5rem auto;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .categories { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .cat-btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .cat-btn:hover { border-color: var(--primary); }
+    .cat-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    input[type="search"] {
+      padding: 0.5rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      min-width: 260px;
+      font-size: 0.9rem;
+    }
+    .layout {
+      max-width: 1200px;
+      margin: 0 auto 3rem;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.12s, border-color 0.12s;
+    }
+    .card:hover { transform: translateY(-2px); border-color: #93c5fd; }
+    .card.selected { border-color: var(--primary); background: var(--primary-light); }
+    .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      background: #e2e8f0;
+      color: #334155;
+      margin-bottom: 0.5rem;
+    }
+    .card h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+    .card p { margin: 0; font-size: 0.85rem; color: var(--muted); }
+    .detail-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      position: sticky;
+      top: 1.5rem;
+    }
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+    @media (max-width: 550px) { .pros-cons { grid-template-columns: 1fr; } }
+    .box { padding: 1rem; border-radius: 10px; font-size: 0.88rem; }
+    .box h4 { margin: 0 0 0.5rem; font-size: 0.9rem; }
+    .box ul { margin: 0; padding-left: 1.1rem; }
+    .box li { margin-bottom: 0.35rem; }
+    .pros { background: var(--green-bg); color: var(--green-text); }
+    .cons { background: var(--red-bg); color: var(--red-text); }
+    .migration-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 0.85rem;
+      background: #f8fafc;
+    }
+    .migration-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      gap: 0.5rem;
+    }
+    .link-tool {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .link-tool:hover { opacity: 0.9; }
+    .diff-tag {
+      font-size: 0.78rem;
+      background: #e2e8f0;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Référentiel des Technologies Data</h1>
+    <p>Cliquez sur une technologie pour voir ses avantages, inconvénients, équivalences et guides de migration.</p>
+  </header>
+
+  <div class="controls">
+    <div class="categories" id="categoryFilters"></div>
+    <input type="search" id="searchInput" placeholder="Rechercher un outil..." />
+  </div>
+
+  <main class="layout">
+    <section class="grid" id="toolsGrid"></main>
+    <aside class="detail-panel" id="detailPanel">
+      <p style="color: var(--muted);">Sélectionnez un outil à gauche pour afficher sa fiche technique.</p>
+    </aside>
+  </main>
+
+  <script>
+    let allTools = [];
+    let activeCategory = 'Toutes';
+    let searchQuery = '';
+    let selectedId = null;
+
+    async function init() {
+      const response = await fetch('./outils.json');
+      allTools = await response.json();
+      if (allTools.length > 0) selectedId = allTools[0].id;
+      renderCategories();
+      renderGrid();
+      renderDetail();
+    }
+
+    function renderCategories() {
+      const cats = ['Toutes', ...new Set(allTools.map(t => t.categorie))];
+      const container = document.getElementById('categoryFilters');
+      container.innerHTML = cats.map(cat => `
+        <button class="cat-btn ${cat === activeCategory ? 'active' : ''}" onclick="setCategory('${cat.replace(/'/g, "\\'")}')">
+          ${cat}
+        </button>
+      `).join('');
+    }
+
+    function setCategory(cat) {
+      activeCategory = cat;
+      renderCategories();
+      renderGrid();
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase();
+      renderGrid();
+    });
+
+    function selectTool(id) {
+      selectedId = id;
+      renderGrid();
+      renderDetail();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('toolsGrid');
+      const filtered = allTools.filter(t => {
+        const matchCat = activeCategory === 'Toutes' || t.categorie === activeCategory;
+        const matchSearch = t.nom.toLowerCase().includes(searchQuery) ||
+                            t.resume.toLowerCase().includes(searchQuery) ||
+                            t.categorie.toLowerCase().includes(searchQuery);
+        return matchCat && matchSearch;
+      });
+
+      grid.innerHTML = filtered.map(tool => `
+        <div class="card ${tool.id === selectedId ? 'selected' : ''}" onclick="selectTool('${tool.id}')">
+          <span class="badge">${tool.categorie}</span>
+          <h3>${tool.nom}</h3>
+          <p>${tool.resume}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderDetail() {
+      const panel = document.getElementById('detailPanel');
+      const tool = allTools.find(t => t.id === selectedId);
+      if (!tool) return;
+
+      const equivHtml = (tool.equivalences || []).map(eq => {
+        const targetExists = allTools.some(t => t.id === eq.cible_id);
+        return `
+          <div class="migration-card">
+            <div class="migration-header">
+              <strong>Alternative : ${eq.cible_nom}</strong>
+              <div>
+                <span class="diff-tag">Complexité : ${eq.difficulte}</span>
+                ${targetExists ? `<button class="link-tool" onclick="selectTool('${eq.cible_id}')">Voir la fiche →</button>` : ''}
+              </div>
+            </div>
+            <p style="margin:0; font-size:0.88rem;"><strong>Comment passer de ${tool.nom} à ${eq.cible_nom} :</strong> ${eq.comment_migrer}</p>
+          </div>
+        `;
+      }).join('');
+
+      panel.innerHTML = `
+        <span class="badge">${tool.categorie}</span>
+        <h2 style="margin:0.2rem 0 0.5rem;">${tool.nom}</h2>
+        <p style="color:var(--muted); margin-top:0;">${tool.resume}</p>
+
+        <div class="pros-cons">
+          <div class="box pros">
+            <h4>Avantages</h4>
+            <ul>${tool.avantages.map(a => `<li>${a}</li>`).join('')}</ul>
+          </div>
+          <div class="box cons">
+            <h4>Inconvénients</h4>
+            <ul>${tool.inconvenients.map(i => `<li>${i}</li>`).join('')}</ul>
+          </div>
+        </div>
+
+        <h3 style="font-size:1.05rem; margin-bottom:0.75rem;">Équivalences & Passages techniques</h3>
+        ${equivHtml || '<p style="color:var(--muted);">Aucune équivalence renseignée.</p>'}
+      `;
+    }
+
+    init();
+  </script>
+</body>
+</html>
