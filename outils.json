@@ -1,5 +1,97 @@
 [
   {
+    "id": "airbyte",
+    "nom": "Airbyte",
+    "categorie": "Ingestion / ETL",
+    "resume": "Plateforme d'ingestion de données (EL/ELT) open-source et cloud avec un large catalogue de connecteurs.",
+    "avantages": [
+      "Nombreux connecteurs prêts à l'emploi (SaaS, API, bases SQL)",
+      "Possibilité de créer des connecteurs personnalisés rapidement (CDK / Low-code)",
+      "Auto-hébergeable sur Docker ou Kubernetes"
+    ],
+    "inconvenients": [
+      "Consommation mémoire/CPU parfois élevée sur les gros volumes ou nombreux flux",
+      "Certains connecteurs communautaires nécessitent un suivi lors des changements d'API"
+    ],
+    "equivalences": [
+      {
+        "cible_id": "dlt",
+        "cible_nom": "dlt (data load tool)",
+        "difficulte": "Faible à moyenne",
+        "comment_migrer": "Remplacer les configurations de sync Airbyte par des pipelines Python déclaratifs dlt, configurer la normalisation du schéma et l'écriture incrémentale vers la même destination, puis désactiver les jobs Airbyte."
+      }
+    ]
+  },
+  {
+    "id": "dlt",
+    "nom": "dlt (data load tool)",
+    "categorie": "Ingestion / ETL",
+    "resume": "Bibliothèque Python open-source pour construire des pipelines d'ingestion légers, typés et versionnés dans le code.",
+    "avantages": [
+      "Pipelines définis en code Python : facile à tester, versionner dans Git et exécuter partout",
+      "Inférence et évolution automatique des schémas + gestion native de l'état incrémental",
+      "Aucun serveur dédié obligatoire (tourne en script, conteneur ou fonction serverless)"
+    ],
+    "inconvenients": [
+      "Moins d'interface graphique no-code qu'un outil ETL visuel",
+      "Demande une maîtrise minimale de Python et de la gestion des secrets/environnements"
+    ],
+    "equivalences": [
+      {
+        "cible_id": "airbyte",
+        "cible_nom": "Airbyte",
+        "difficulte": "Faible à moyenne",
+        "comment_migrer": "Recréer les connexions source -> destination dans Airbyte, aligner les modes de synchronisation (full refresh ou incrémental) et basculer l'ordonnancement vers Airbyte."
+      }
+    ]
+  },
+  {
+    "id": "airflow",
+    "nom": "Apache Airflow",
+    "categorie": "Orchestration",
+    "resume": "Orchestrateur de workflows open-source piloté par code Python (DAGs), standard historique de l'écosystème Data.",
+    "avantages": [
+      "Écosystème immense de providers, opérateurs et intégrations",
+      "Graphes de dépendances (DAGs) riches, retries, alertes et historique d'exécution détaillé",
+      "Large communauté et forte maturité en production"
+    ],
+    "inconvenients": [
+      "Architecture distribuée (scheduler, webserver, workers, base métadonnées) lourde à maintenir en self-hosted",
+      "Modélisation dynamique des tâches ou faible latence parfois plus complexe qu'avec des orchestrateurs modernes"
+    ],
+    "equivalences": [
+      {
+        "cible_id": "dagster",
+        "cible_nom": "Dagster",
+        "difficulte": "Moyenne à élevée",
+        "comment_migrer": "Traduire la logique des DAGs (tâches impératives) en Data Assets (dépendances orientées données), configurer les capteurs/schedules et les ressources, puis migrer les alertes et tests de qualité."
+      }
+    ]
+  },
+  {
+    "id": "dagster",
+    "nom": "Dagster",
+    "categorie": "Orchestration",
+    "resume": "Orchestrateur Data orienté 'Software-Defined Assets' intégrant nativement le lignage, les tests et l'observabilité.",
+    "avantages": [
+      "Approche centrée sur les actifs de données (tables, fichiers, modèles) plutôt que sur de simples tâches",
+      "Tests de qualité et vérifications intégrés directement au cycle de matérialisation",
+      "Développement local fluide et typage fort"
+    ],
+    "inconvenients": [
+      "Courbe d'apprentissage initiale pour adopter le paradigme des assets",
+      "Moins de modèles de DAGs tout faits trouvés en ligne que sur Airflow"
+    ],
+    "equivalences": [
+      {
+        "cible_id": "airflow",
+        "cible_nom": "Apache Airflow",
+        "difficulte": "Moyenne à élevée",
+        "comment_migrer": "Réécrire la matérialisation des assets sous forme d'opérateurs/tâches dans des DAGs Airflow, reproduire les dépendances amont/aval et reconfigurer les planifications et retries."
+      }
+    ]
+  },
+  {
     "id": "snowflake",
     "nom": "Snowflake",
     "categorie": "Data Warehouse Cloud",
